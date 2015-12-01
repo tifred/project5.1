@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Project 5</title>
+  <script src="js/lib/jquery-2.1.4.js"></script>
+  <script src="js/googleMap.js"></script>
+  <script src="js/lib/knockout-3.2.0.js"></script>
+  <link href="css/bootstrap.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato:500,400" rel="stylesheet">
+  <script src="js/app.js"></script>
+  <!-- googleCallback.js contains success and error functions. -->
+  <script src="js/googleCallback.js"></script>
+  <script async type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&amp;callback=googleSuccess" onerror="googleError()"></script>
+</head>
+<body>
+  <!-- CONTAINER-->
+
+  <div class="container">
+
+    <!-- THE HEADER, WITH MENU ICON -->
+
+    <header class="row header-row">
+      <div class="col-xs-4">
+        <h3>Locations</h3>
+      </div>
+      <div class="col-xs-2 col-xs-offset-6">
+
+        <!-- The menu icon has a media query to make
+             it only appear above 768px in width.
+             A click runs toggleListPanel which changes
+             toggleListView from true to false or vice versa, 
+             which adds or removes the "visible" classes to the element.
+             In other words, a click hides the list panel or shows it. -->
+
+        <button class="menu-icon" data-bind="click: toggleListPanel">
+          <span class="glyphicon glyphicon-align-justify"></span>
+        </button>
+
+      </div>
+    </header>
+
+    <!-- MAIN -->
+
+    <main class="row">
+
+      <!-- LIST VIEW PANEL -->
+
+      <!-- Hide entire list view when button of
+           class "menu-icon" (above) is clicked.
+           Accomplished by adding/removing the "hidden-xs" class.
+
+           The class "col-xs-3" will be applied at all times.
+
+           Note that the other column in this row is the map, which 
+           uses col-xs-9 by default. If the menu icon is toggled, the map
+           uses col-xs-12.  -->
+
+      <div data-bind="attr: { class: listViewClasses}">
+
+        <!-- FILTER FORM -->
+
+        <section class="row">
+          <div class="col-sm-12">
+
+            <!-- Show prompt text until user clicks on input.
+
+                 Submit input to "filterList".
+		 Does exact matches, case insensitive, on any portion of the string 
+		 autocomplete=off needed to keep browser from caching input.
+
+		 "RealTime" filtering also happens with each keyboard input.
+		 a "textInput" binding on the input field makes this happen.
+		 Note this makes the Filter submit button redundant -->
+
+            <form id="filter-form" data-bind="submit: filterList" autocomplete="off">
+              <input id="filter-input-prompt" type="text" data-bind="attr: { value: prompt}, click: edit, textInput: searchInputValue, event: {keyup: filterListRealTime}" autocomplete="off">
+              <input id="filter-input-submit" type="submit" value="Filter">
+            </form>
+
+          </div>
+        </section>
+
+        <!-- RESET FORM -->
+
+        <section class="row">
+          <div class="col-sm-12">
+            <form data-bind="submit: reset">
+              <input id="clear-filter-input-submit" type="submit" value="Reset">
+            </form>
+          </div>
+        </section>
+
+        <!-- LIST OF LOCATIONS -->
+
+        <section class="row">
+          <div id="div-list" class="col-sm-12">
+
+            <!-- Populate ul using data from locList
+                 but only if item is marked as visible.
+                 Also set up a click event to bounce marker on map. -->
+
+            <ul class="text-left" data-bind="foreach: locList">
+              <li class="text-left" data-bind="text: $data.name, visible: $data.visible, click: $parent.bounceMarker"></li>
+            </ul>
+
+            <!-- Show an error message if and only if no matches were found -->
+
+            <p class="text-left" data-bind="visible: showFilterError">No locations have that name.  Use the Reset button and try again.</p>
+          </div>
+        </section>
+
+      </div> <!-- END LIST VIEW PANEL -->
+
+      <!-- MAP -->
+      
+      <!-- The mapDiv is at col-xs-9 by default.
+           Clicking menu icon switches it to col-xs-12.
+           Clicking it again toggles it back to col-xs-9.
+           A media query handles a special case (see notes
+           in app.js on mapViewClasses). -->
+
+      <div id="mapDiv" data-bind="attr: { class: mapViewClasses}">
+        <div id="map">
+        </div>
+      </div> <!-- END MAP -->
+
+    </main> <!-- END MAIN -->
+
+  </div> <!-- END CONTAINER -->
+
+</body>
+</html>
