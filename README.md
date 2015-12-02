@@ -1,6 +1,6 @@
 ## TO RUN AND TEST APPLICATION:
 
-1. Load dist/index.html in a browser.
+1. Load dist/index.html in a browser
 
 * List of 10 locations should appear in list.
 * Map of 10 locations with 10 markers should appear.
@@ -9,7 +9,7 @@
 * Other locations will have red markers.
 
 
-2. Click on any marker on map.
+2. Click on any marker on map
 
 * Marker should bounce for two seconds.
 * Info Window should open.
@@ -23,7 +23,7 @@
 * Should open URL in another tab in the browser.
 
 
-4. Click on a marker while another marker is already bouncing.
+4. Click on a marker while another marker is already bouncing
 
 * The first marker should stop bouncing.
 * Only the most recently clicked marker should bounce.
