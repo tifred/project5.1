@@ -40,8 +40,8 @@
 
 8. Enter text in Filter Input Field
 
-  * Text should be matched, in real time, letter by letter,
-  * against locations (case insensitive, full-text search)
+  * Text should be matched, in real time, letter by letter, against locations
+  * Matches are case insensitive and apply to all text, not just the start of a word
   * For instance, typing "ho" should match the location "Soho"
   * Matched location (only) should appear in list
   * Matched marker (only) should appear on map
