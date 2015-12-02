@@ -12,6 +12,8 @@ The rough order of events:
 */
 
 var map;
+// var currentInfoWindow = null; // used to ensure only one infoWindow is open at once.
+var currentMarker = null;     // used to ensure only one marker bounces at a time.
 
 
 /*
@@ -19,7 +21,6 @@ var map;
 */
 
 function initializeMap(location, isPark, loc) {
-    console.log("YY " + loc.name());
 
 
     var mapOptions = {
@@ -28,32 +29,48 @@ function initializeMap(location, isPark, loc) {
     };
     map = new google.maps.Map(document.querySelector('#map'), mapOptions);
 
+    var infoWindow = new google.maps.InfoWindow({
+      content: null
+    });
+
   // Build map marker and info window.
 
   function createMapMarker(placeData, infoLinks) {
-    console.log("from createMap " + loc.name());
 
     var lat = placeData.geometry.location.lat();  // latitude from the place service
     var lon = placeData.geometry.location.lng();  // longitude from the place service
     var name = placeData.formatted_address;       // name of the place from the place service
     var bounds = window.mapBounds;                // current boundaries of the map window
 
-    var marker = new google.maps.Marker({
-      map: map,
-      position: placeData.geometry.location,
-      title: name,
-    });
+    if (loc.park()) {
+      var marker = new google.maps.Marker({
+        map: map,
+        position: placeData.geometry.location,
+        title: name,
+        icon: 'img/darkgreen_MarkerP.png'
+      });
+    } else {
+      var marker = new google.maps.Marker({
+        map: map,
+        position: placeData.geometry.location,
+        title: name,
+      });
+    }
 
-    // Will this work?  do I need to enclose it in another scope?
+    google.maps.event.addListener(marker, 'click', (function(markerCopy, infoLinksCopy) {
+      return function() {
+	if (currentMarker) currentMarker.setAnimation(null);
+	currentMarker = markerCopy;
+	markerCopy.setAnimation(google.maps.Animation.BOUNCE);
+	setTimeout(function() {
+	  markerCopy.setAnimation(null);
+	}, 2000);
 
-    google.maps.event.addListener(marker, 'click', function() {
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      setTimeout(function() {
-        marker.setAnimation(null);
-      }, 2000);
-      infoWindow.content = infoLinks; // particularly here.
-      infoWindow.open(map, marker);
-    });
+	infoWindow.content = infoLinksCopy;
+	infoWindow.open(map, markerCopy);
+      };
+    })(marker, infoLinks));
+    
 
     // bounds.extend() takes in a map location object
     bounds.extend(new google.maps.LatLng(lat, lon));
@@ -61,9 +78,6 @@ function initializeMap(location, isPark, loc) {
     loc.marker = marker;
     loc.infoLinks = infoLinks;
     loc.bounds = bounds;
-    if (loc.park()) {
-      loc.marker.icon = 'img/darkgreen_MarkerP.png';
-    }   
   }
 
   /*

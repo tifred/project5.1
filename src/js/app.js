@@ -96,10 +96,6 @@ var ViewModel = function() {
     self.allLocs.push(new Location(locItem));
   });
 
-  var infoWindow = new google.maps.InfoWindow({
-    content: null
-  });
-
 
   self.allLocs.forEach(function(loc) {
     var location = '' + loc.name() + ', ' + loc.state() + '';
@@ -142,7 +138,12 @@ var ViewModel = function() {
     });
   };
 
+/* Think I can erase this....
   self.nameClicked = function(loc) {
+    console.log("loc.infoLinks: " + loc.infoLinks); 
+    console.log("infoWindow.content 1" + infoWindow.content);
+    infoWindow.content = null;
+    console.log("infoWindow.content 2" + infoWindow.content);
     map.setZoom(15);
     loc.marker.setAnimation(google.maps.Animation.BOUNCE);
     setTimeout(function() {
@@ -150,6 +151,7 @@ var ViewModel = function() {
     }, 2000);
 
     infoWindow.content = loc.infoLinks;
+    console.log("infoWindow.content 3" + infoWindow.content);
     infoWindow.open(map, loc.marker);
 
     // Fit the map to the new marker
@@ -157,6 +159,13 @@ var ViewModel = function() {
     // Center the map
     map.setCenter(loc.bounds.getCenter());
   };
+*/
+
+  self.nameClicked = function(loc) {
+    google.maps.event.trigger(loc.marker, 'click');
+  };
+
+
 
 
   /*
