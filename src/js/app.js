@@ -8,61 +8,51 @@ var initialLocations = [
   {
      name: "Brooklyn",
      state: "NY",
-     visible: true,
      park: false
   },
   {
      name: "Queens",
      state: "NY",
-     visible: true,
      park: false
   },
   {
      name: "Harlem",
      state: "NY",
-     visible: true,
      park: false
   },
   {
      name: "Lower East Side",
      state: "NY",
-     visible: true,
      park: false
   },
   {
      name: "Washington Heights",
      state: "NY",
-     visible: true,
      park: false
   },
   {
      name: "Soho",
      state: "NY",
-     visible: true,
      park: false
   },
   {
      name: "Washington Square Park",
      state: "NY",
-     visible: true,
      park: true
   },
   {
      name: "Central Park",
      state: "NY",
-     visible: true,
      park: true
   },
   {
      name: "Astoria Park",
      state: "NY",
-     visible: true,
      park: true
   },
   {
      name: "Madison Square Park",
      state: "NY",
-     visible: true,
      park: true
   }
 ];
@@ -70,13 +60,14 @@ var initialLocations = [
 /*
    Location: Constructor that will be used for each location.
    All properties are observables.
-*/
-
+*/ 
 var Location = function(data) {
   this.name = ko.observable(data.name);
   this.state = ko.observable(data.state);
-  this.visible = ko.observable(data.visible);
   this.park = ko.observable(data.park);
+  this.marker = null;
+  this.infoLinks = null;
+  this.bounds = null;
 };
 
 var ViewModel = function() {
@@ -88,8 +79,7 @@ var ViewModel = function() {
      "Location" constructor.
   */
 
-  this.locList = ko.observableArray([]);
-  this.prompt = ko.observable("Type Location Here");
+  this.allLocs = [];
   this.toggleListView = ko.observable(false);
   this.showFilterError = ko.observable(false);
   this.searchInputValue = ko.observable("");
@@ -97,64 +87,33 @@ var ViewModel = function() {
   this.mapViewClasses = ko.observable("col-xs-9");
 
   /*
-     buildList: Build the locList from the initialLocations array.
+     Build the locList from the initialLocations array.
      This is how the initial list is displayed,
      in which all locations are visible.
   */
 
-  this.buildList = function() {
-    initialLocations.forEach(function(locItem) {
-      self.locList.push(new Location(locItem));
-    });
-  };
-  this.buildList();  // build it now.
+  initialLocations.forEach(function(locItem) {
+    self.allLocs.push(new Location(locItem));
+  });
 
-  /*
-     buildMap: Build the map from the list
-     of locations currently marked visible.
+  var infoWindow = new google.maps.InfoWindow({
+    content: null
+  });
 
-     The mapLocations array contains all visible locations.
-     Each element is an object that contains, for example:
-       location: Brooklyn, NY,
-       park: false
 
-     buildMap calls initializeMap, which is defined in the google.Map.js file.
-       "false" parameter means DO NOT bounce the marker for each location.
-       "true" parameter means DO bounce the marker for each location.
-     (Note: this is unrelated to setting up event handlers to bounce markers.
-     That happens in the google.Map.js file.)
+  self.allLocs.forEach(function(loc) {
+    var location = '' + loc.name() + ', ' + loc.state() + '';
+    var isPark = loc.park();
+    initializeMap(location, isPark, loc);
+  });
 
-     Only run initializeMap after whole window is loaded, or errors may occur.
-  */
+  self.visLocs = ko.observableArray();
 
-  this.buildMap = function() {
-    var mapLocations = [];
-    self.locList().forEach(function(loc) {
-      if (loc.visible()) {
-        mapLocations.push(
-          {
-           location: '' + loc.name() + ', ' + loc.state() + '',
-           park: loc.park()
-          }
-        );
-      }
-    });
-    window.addEventListener('load', initializeMap(mapLocations, false));
-  };
-  this.buildMap();  // build it now.
+  // At the start, make all locations visible.
+  self.allLocs.forEach(function(loc) {
+    self.visLocs.push(loc);
+  });
 
-  /*
-    filterList: Filter list and map of locations based on user input.
-    formElement is the form element, passed in by Knockout.
-    inputString is the value the user typed in.
-    regexp is the same string, but formatted as a regular expression.
-  */
-
-  this.filterList = function(formElement) {
-    var inputString = $(formElement).children("input").val();
-    var regexp = new RegExp(inputString, 'i');
-    this.updateAfterFilter(regexp);
-  };
 
   /*
     filterListRealTime: Filter list and map of locations based on user input.
@@ -164,57 +123,41 @@ var ViewModel = function() {
 
   this.filterListRealTime = function() {
     var regexp = new RegExp(this.searchInputValue(), 'i');
-    this.updateAfterFilter(regexp);
-  };
+    self.visLocs.removeAll();
+    self.showFilterError(true); // set error message to show unless a match is found.
 
-  /*
-    updateAfterFilter: helper method used by both filter methods.
-    The test method will return true if a match is found given the "place".
-    based on that test,  the visible status of each location is
-    set to true or false.  The list view will update automatically because of a
-    foreach data-bind to the ul tag.
-
-    Another test is done to decide whether to show an error
-    when no matches are found.
-    Finally, the map is rebuilt.
-  */
-
-  this.updateAfterFilter = function(regexp) {
-    this.showFilterError(true); // set error message to show unless a match is found.
-    self.locList().forEach(function(loc) {
+    self.allLocs.forEach(function(loc) {
       var place =  loc.name() + loc.state();
-      regexp.test(place) ? loc.visible(true) : loc.visible(false);
+      if (regexp.test(place)) {
+        self.visLocs.push(loc);
+      }
       // if any single match is found, set error message to NOT show.
       if (regexp.test(place)) {
         self.showFilterError(false);
       }
     });
-    this.buildMap();
-  };
 
-  /*
-    Reset: Reset button to clear the filter form.
-    Sets all locations to visible.
-    Returns "prompt" to original value.
-    Sets "showFilterError" to false so the error will not display.
-  */
-
-  this.reset = function() {
-    // to clear the browser cache of input form:
-    document.getElementById("filter-form").reset();
-    self.prompt("Type Location Here");
-    this.showFilterError(false);
-    self.locList().forEach(function(loc) {
-      loc.visible(true);
+    self.visLocs().forEach(function(loc) {
+      loc.marker.setVisible(true);
     });
-    this.buildMap();
   };
 
-  // Edit: Clear out the prompt text when a user clicks on the input filter field.
+  self.nameClicked = function(loc) {
+    map.setZoom(15);
+    loc.marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function() {
+      loc.marker.setAnimation(null);
+    }, 2000);
 
-  this.edit = function() {
-    this.prompt("");
+    infoWindow.content = loc.infoLinks;
+    infoWindow.open(map, loc.marker);
+
+    // Fit the map to the new marker
+    map.fitBounds(loc.bounds);
+    // Center the map
+    map.setCenter(loc.bounds.getCenter());
   };
+
 
   /*
      toggleListPanel: Clicking on menu icon (only visible below 768px in width)
@@ -243,26 +186,6 @@ var ViewModel = function() {
     }
   };
 
-  /*
-    bounceMarker: Clicking on list item makes associated marker in map bounce.
-    Only applies to the single, clicked-upon item.
-    The bounceLocation is akin to the mapLocation array in buildMap.
-
-    The "true" parameter means initializeMap will bounce the marker
-    for just this one location.  All other locations are left alone.
-  */
-
-  this.bounceMarker = function(loc) {
-    var bounceLocation = [];
-    // bounceLocation.push('' + loc.name() + ', ' + loc.state() + '');
-    bounceLocation.push(
-      {
-       location: '' + loc.name() + ', ' + loc.state() + '',
-       park: loc.park()
-      }
-    );
-    window.addEventListener('load', initializeMap(bounceLocation, true));
-  };
 };
 /*
   The line below will be run from the googleSuccess function

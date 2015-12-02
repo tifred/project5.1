@@ -11,144 +11,59 @@ The rough order of events:
   "createMapMarker" sets up event listener to bounce marker on click OR starts a bounce now.
 */
 
-var map;                      // declares a global map variable
-var currentMarker = null;     // used to ensure only one marker bounces at a time.
-var currentInfoWindow = null; // used to ensure only one infoWindow is open at once.
-var oneMarkerOnly = false;    // used to keep zoom level at 15 when window resized on one marker.
+var map;
+
 
 /*
    initializeMap: the main function.
-
-   Run from ViewModel in the "app.js" file.
-   "locations" is an array with elements like: "Brooklyn, NY"
-   "bounce" is a boolean:
-      true means to set one single location's marker bouncing right now.
-      false means to set an event listener to make that happen later.
-
-   Note: if bounce was set to true when initializeMap was called,
-   then the "locations" array was also set to only have a single location in it.
-   That is the marker that will be set to bounce now.
 */
 
-function initializeMap(locations, bounce) {
+function initializeMap(location, isPark, loc) {
+    console.log("YY " + loc.name());
 
-  // Empty now, but may be useful in future.
-  var mapOptions = {};
 
-  // Determine number of locations to display.
-  var markerCount = locations.length;
+    var mapOptions = {
+      center: {lat: 40.7058316, lng: -70.0490814},
+      zoom: 8 
+    };
+    map = new google.maps.Map(document.querySelector('#map'), mapOptions);
 
-  // Set the global variable to true/false, depending on number of locations.
-  // One location is used when filtering to one item or when bouncing upon a click.
-  markerCount === 1 ? oneMarkerOnly = true : oneMarkerOnly = false ;
+  // Build map marker and info window.
 
-  // build instance of map from Google's constructor.
-  // the final map image will be part of the "#map" element in the HTML.
-
-  map = new google.maps.Map(document.querySelector('#map'), mapOptions);
-
-  // Build map marker and info window per location.
-
-  function createMapMarker(placeData, infoLinks, isPark) {
+  function createMapMarker(placeData, infoLinks) {
+    console.log("from createMap " + loc.name());
 
     var lat = placeData.geometry.location.lat();  // latitude from the place service
     var lon = placeData.geometry.location.lng();  // longitude from the place service
     var name = placeData.formatted_address;       // name of the place from the place service
     var bounds = window.mapBounds;                // current boundaries of the map window
 
-    // If it is a park, use the dark green icon instead of standard red one.
-
-    if (isPark) {
-      var marker = new google.maps.Marker({
-        map: map,
-        position: placeData.geometry.location,
-        title: name,
-        icon: 'img/darkgreen_MarkerP.png'
-      });
-    } else {
-      var marker = new google.maps.Marker({
-        map: map,
-        position: placeData.geometry.location,
-        title: name,
-      });
-    }
-
-    var infoWindow = new google.maps.InfoWindow({
-      content: infoLinks
+    var marker = new google.maps.Marker({
+      map: map,
+      position: placeData.geometry.location,
+      title: name,
     });
 
-    /*
-       oneBounceOnly: a helper function.
-       When marker is clicked, stop bouncing on any other bouncing markers.
-       Uses the currentMarker variable, which must be global.
-    */
+    // Will this work?  do I need to enclose it in another scope?
 
-    function oneBounceOnly(marker) {
-      if (currentMarker) currentMarker.setAnimation(null);
-      currentMarker = marker;
+    google.maps.event.addListener(marker, 'click', function() {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function() {
         marker.setAnimation(null);
       }, 2000);
-    }
-
-    /*
-       oneInfoWindowOnly: a helper function.
-       When marker is clicked, close the infoWindow open already.
-       Uses the currentInfoWindow variable, which must be global.
-    */
-
-    function oneInfoWindowOnly(map, marker, infoWindow) {
-      if (currentInfoWindow) currentInfoWindow.close();
-      currentInfoWindow = infoWindow;
+      infoWindow.content = infoLinks; // particularly here.
       infoWindow.open(map, marker);
-    }
-
-    /*
-       Here is where the boolean parameter "bounce" matters.
-       If bounce is true, open the info window and bounce the marker NOW.
-       There will only be one location in the locations array.
-
-       Otherwise, set up an event listener to open the info window
-       and bounce the marker when there is a click LATER.
-       The zoom will be set to accomodate all the markers.
-
-       In fact, even a deliberately bounced marker needs an event listener
-       to bounce later, because the infoWindow can be closed and then clicked on again.
-       So the event listener happens whether it is a bounce or not.
-    */
-
-    if (bounce) {
-        oneInfoWindowOnly(map, marker, infoWindow);
-        oneBounceOnly(marker);
-    } 
-    google.maps.event.addListener(marker, 'click', function() {
-      oneInfoWindowOnly(map, marker, infoWindow);
-      oneBounceOnly(marker);
     });
 
-    /*
-       This is where the pin actually gets added to the map.
-       bounds.extend() takes in a map location object
-    */
+    // bounds.extend() takes in a map location object
     bounds.extend(new google.maps.LatLng(lat, lon));
 
-    /*
-       If there is more than one marker, use the default zooming.
-       If there is just one marker, which happens when clicking
-       on the list of locations or filtering on them, set zoom to 15.
-    */
-
-    // Fit the map to the new marker
-    map.fitBounds(bounds);
-
-    // Center the map
-    map.setCenter(bounds.getCenter());
-
-    // Set zoom to 15, about a 1 mile radius around the single marker.
-    if (markerCount === 1) {
-      map.setZoom(15);
-    }
+    loc.marker = marker;
+    loc.infoLinks = infoLinks;
+    loc.bounds = bounds;
+    if (loc.park()) {
+      loc.marker.icon = 'img/darkgreen_MarkerP.png';
+    }   
   }
 
   /*
@@ -188,7 +103,7 @@ function initializeMap(locations, bounce) {
         var wikiRequestTimeout = setTimeout(function() {
           var failText = "<p>Failed to get wikipedia resources.  Sorry.</p>";
           var infoLinks = failText;
-          createMapMarker(results[0], infoLinks, true);
+          createMapMarker(results[0], infoLinks);
         }, 8000);
 
         $.ajax({
@@ -204,7 +119,7 @@ function initializeMap(locations, bounce) {
             }
             items.push("</ul>");
             var infoLinks = items.join("");
-            createMapMarker(results[0], infoLinks, true);
+            createMapMarker(results[0], infoLinks);
             clearTimeout(wikiRequestTimeout);
           }
         });
@@ -219,12 +134,12 @@ function initializeMap(locations, bounce) {
             }
             items.push("</ul>");
             var infoLinks = items.join("");
-            createMapMarker(results[0], infoLinks, false);
+            createMapMarker(results[0], infoLinks);
           })
           .fail(function() {
             var failText = "<p>Failed to Load the NYT articles.  Sorry.</p>";
             var infoLinks = failText;
-            createMapMarker(results[0], infoLinks, false);
+            createMapMarker(results[0], infoLinks);
           });
       }
     } else {
@@ -239,40 +154,29 @@ function initializeMap(locations, bounce) {
     }
   }
 
-  function pinPoster(locations) {
-
+  function pinPoster(location, isPark) {
     var service = new google.maps.places.PlacesService(map);
 
+    var request = {
+      query: location
+    };
+
     /*
-       Iterate through the array of locations.
-       Create a search object for each location.
-       The callback will then go on to call createMapMarker.
+      Go get results for the given query from Google.
+      When the results arrive, run the callback function.
+
+       Note: I ran into trouble passing along the "isPark" variable.
+       Don't know why, but resorted to using the "if" below to directly
+       pass along a true or false.
+
+       Note: I had to use the format below to pass a new argument to the callback
+       run by textSearch.  Otherwise, it wouldn't take the last boolean argument.
     */
 
-    for (var i = 0; i < locations.length; i++) {
-      // The search request object:
-      var request = {
-        query: locations[i].location
-      };
-      var isPark = locations[i].park;
-
-      /*
-        Go get results for the given query from Google.
-        When the results arrive, run the callback function.
-
-         Note: I ran into trouble passing along the "isPark" variable.
-         Don't know why, but resorted to using the "if" below to directly
-         pass along a true or false.
-
-         Note: I had to use the format below to pass a new argument to the callback
-         run by textSearch.  Otherwise, it wouldn't take the last boolean argument.
-      */
-
-      if (isPark) {
-        service.textSearch(request, function(results, status) { callback(results, status, true);});
-      } else {
-        service.textSearch(request, function(results, status) { callback(results, status, false);});
-      }
+    if (isPark) {
+      service.textSearch(request, function(results, status) { callback(results, status, true);});
+    } else {
+      service.textSearch(request, function(results, status) { callback(results, status, false);});
     }
   }
 
@@ -280,7 +184,7 @@ function initializeMap(locations, bounce) {
   window.mapBounds = new google.maps.LatLngBounds();
 
   // pinPoster(locations) creates pins on the map for each location.
-  pinPoster(locations);
+  pinPoster(location, isPark);
 }
 
 /*

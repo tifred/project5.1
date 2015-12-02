@@ -76,21 +76,8 @@
 		 a "textInput" binding on the input field makes this happen.
 		 Note this makes the Filter submit button redundant -->
 
-            <form id="filter-form" data-bind="submit: filterList" autocomplete="off">
-              <input id="filter-input-prompt" type="text" data-bind="attr: { value: prompt}, click: edit, textInput: searchInputValue, event: {keyup: filterListRealTime}" autocomplete="off">
-              <input id="filter-input-submit" type="submit" value="Filter">
-            </form>
+            <input id="filter-input-prompt" type="search" placeholder="Type Locations Here..." data-bind="textInput: searchInputValue, event: {keyup: filterListRealTime}" autocomplete="off">
 
-          </div>
-        </section>
-
-        <!-- RESET FORM -->
-
-        <section class="row">
-          <div class="col-sm-12">
-            <form data-bind="submit: reset">
-              <input id="clear-filter-input-submit" type="submit" value="Reset">
-            </form>
           </div>
         </section>
 
@@ -103,8 +90,8 @@
                  but only if item is marked as visible.
                  Also set up a click event to bounce marker on map. -->
 
-            <ul class="text-left" data-bind="foreach: locList">
-              <li class="text-left" data-bind="text: $data.name, visible: $data.visible, click: $parent.bounceMarker"></li>
+            <ul class="text-left" data-bind="foreach: visLocs">
+              <li class="text-left" data-bind="text: $data.name, click: $parent.nameClicked"></li>
             </ul>
 
             <!-- Show an error message if and only if no matches were found -->

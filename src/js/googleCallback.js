@@ -6,5 +6,5 @@ function googleSuccess() {
 }
 
 function googleError() {
-  alert("Couldn't contact Google Maps.  Consider yourself lost.");
+  alert("Couldn't contact Google Maps.");
 }
