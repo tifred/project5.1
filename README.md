@@ -43,10 +43,8 @@
   * Text should be matched, in real time, letter by letter,
   * against locations (case insensitive, full-text search)
   * For instance, typing "ho" should match the location "Soho"
-
   * Matched location (only) should appear in list
   * Matched marker (only) should appear on map
-
   * InfoWindow should NOT open
   * Marker should NOT bounce
 
@@ -55,7 +53,6 @@
   * "Menu" icon should appear in top right corner
   * Purple margin should appear around map image to allow for scrolling on mobile
   * (otherwise, one could only scroll the map itself)
-
   * In landscape mode on mobile, the height of map is reduced to fit better on the screen
 
 10. Click on "Menu" icon (only visible below 768 px)
