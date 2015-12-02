@@ -14,6 +14,7 @@ The rough order of events:
 var map;
 // var currentInfoWindow = null; // used to ensure only one infoWindow is open at once.
 var currentMarker = null;     // used to ensure only one marker bounces at a time.
+var infoWindow; 
 
 
 /*
@@ -28,10 +29,8 @@ function initializeMap(location, isPark, loc) {
       zoom: 8 
     };
     map = new google.maps.Map(document.querySelector('#map'), mapOptions);
+    infoWindow = new google.maps.InfoWindow();
 
-    var infoWindow = new google.maps.InfoWindow({
-      content: null
-    });
 
   // Build map marker and info window.
 
@@ -66,7 +65,8 @@ function initializeMap(location, isPark, loc) {
 	  markerCopy.setAnimation(null);
 	}, 2000);
 
-	infoWindow.content = infoLinksCopy;
+        infoWindow.close();
+	infoWindow.setContent(infoLinksCopy);
 	infoWindow.open(map, markerCopy);
       };
     })(marker, infoLinks));
