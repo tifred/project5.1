@@ -2,19 +2,19 @@
 
 1. Load dist/index.html in a browser
 
-* List of 10 locations should appear in list
-* Map of 10 locations with 10 markers should appear
-* Filter input field should read "Type Locations Here.."
-* Locations that are parks will have green markers on the map
-* Other locations will have red markers
+  * List of 10 locations should appear in list
+  * Map of 10 locations with 10 markers should appear
+  * Filter input field should read "Type Locations Here.."
+  * Locations that are parks will have green markers on the map
+  * Other locations will have red markers
 
 2. Click on any marker on map
 
-* Marker should bounce for two seconds
-* Info Window should open
-* Info Window for neighborhoods should include three URL links and text from
-* the New York Times's data API (the three most recent articles on this location)
-* Info Window for parks should show link(s) to wikipedia
+  * Marker should bounce for two seconds
+  * Info Window should open
+  * Info Window for neighborhoods should include three URL links and text from
+  * the New York Times's data API (the three most recent articles on this location)
+  * Info Window for parks should show link(s) to wikipedia
 
 3. Click on link in Info Window
 
