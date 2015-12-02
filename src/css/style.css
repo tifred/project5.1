@@ -1,37 +1,36 @@
 .header-row {
-  background-color: #9D94B4;
+  background-color: #9d94b4;
 }
 
 h3,
 .menu-icon {
-  font-family: Lato, sans-serif; font-weight: 500;
+  font-family: Lato, sans-serif;
+  font-weight: 500;
   margin-top: 10px;
 }
 
 input,
 li {
-  font-family: Lato, sans-serif; font-weight: 400;
+  font-family: Lato, sans-serif;
+  font-weight: 400;
 }
 
-#filter-input-submit,
+#filter-input-div {
+  background-color: #9d94b4;
+}
+
 #filter-input-prompt {
   margin-top: 5px;
 }
 
-#filter-input-prompt,
-#filter-input-submit,
-#clear-filter-input-submit {
-  background-color: #B6E2ED;
-}
-
-#clear-filter-input-submit {
-  margin-bottom: 5px;
+#filter-input-prompt {
+  background-color: #b6e2ed;
 }
 
 /* finicky adjustment to match size of map div */
 #div-list {
-  height: 681px;
-  background-color: #9D94B4;
+  height: 769px;
+  background-color: #9d94b4;
 }
 
 ul {
@@ -61,13 +60,13 @@ li:hover {
   margin: 0 0;
 }
 
-@media only screen AND (max-width: 768px) {
+@media only screen and (max-width: 768px) {
 
   /* add padding so user can scroll page, not just scroll map itself */
   #mapDiv {
     padding-left: 5%;
     padding-right: 5%;
-    background-color: #9D94B4;
+    background-color: #9d94b4;
   }
 
   #filter-input-prompt {
@@ -75,19 +74,19 @@ li:hover {
   }
 }
 
-@media only screen AND (max-width: 768px) AND (orientation: landscape) {
+@media only screen and (max-width: 768px) and (orientation: landscape) {
   #mapDiv {
     height: 450px;
   }
 
   #div-list {
-    height: 331px;
+    height: 419px;
   }
 }
 
 /* Don't show menu icon above 768px */
 /* Change map to width of 75%. */
-@media only screen AND (min-width: 768px) {
+@media only screen and (min-width: 768px) {
   .menu-icon {
     display: none;
   }
@@ -101,8 +100,8 @@ li:hover {
 }
 
 /* finicky adjustment to match size of map div */
-@media only screen AND (min-width: 992px) {
+@media only screen and (min-width: 992px) {
   #div-list {
-    height: 712px;
+    height: 769px;
   }
 }

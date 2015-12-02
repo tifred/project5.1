@@ -13,8 +13,6 @@
   <link href="https://fonts.googleapis.com/css?family=Lato:500,400" rel="stylesheet">
   <script src="js/app.js"></script>
   <!-- googleCallback.js contains success and error functions. -->
-  <script src="js/googleCallback.js"></script>
-  <script async type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&amp;callback=googleSuccess" onerror="googleError()"></script>
 </head>
 <body>
   <!-- CONTAINER-->
@@ -32,7 +30,7 @@
         <!-- The menu icon has a media query to make
              it only appear above 768px in width.
              A click runs toggleListPanel which changes
-             toggleListView from true to false or vice versa, 
+             toggleListView from true to false or vice versa,
              which adds or removes the "visible" classes to the element.
              In other words, a click hides the list panel or shows it. -->
 
@@ -55,26 +53,23 @@
 
            The class "col-xs-3" will be applied at all times.
 
-           Note that the other column in this row is the map, which 
+           Note that the other column in this row is the map, which
            uses col-xs-9 by default. If the menu icon is toggled, the map
            uses col-xs-12.  -->
 
       <div data-bind="attr: { class: listViewClasses}">
 
-        <!-- FILTER FORM -->
+        <!-- FILTER INPUT -->
 
         <section class="row">
-          <div class="col-sm-12">
+          <div class="col-sm-12" id="filter-input-div">
 
             <!-- Show prompt text until user clicks on input.
 
-                 Submit input to "filterList".
-		 Does exact matches, case insensitive, on any portion of the string 
-		 autocomplete=off needed to keep browser from caching input.
-
-		 "RealTime" filtering also happens with each keyboard input.
-		 a "textInput" binding on the input field makes this happen.
-		 Note this makes the Filter submit button redundant -->
+                 Submit input to "filterListRealTime".
+                 Does exact matches, case insensitive, on any portion of the string.
+                 A "textInput" binding on the input field makes this happen.
+                 autocomplete=off needed to keep browser from caching input. -->
 
             <input id="filter-input-prompt" type="search" placeholder="Type Locations Here..." data-bind="textInput: searchInputValue, event: {keyup: filterListRealTime}" autocomplete="off">
 
@@ -86,9 +81,11 @@
         <section class="row">
           <div id="div-list" class="col-sm-12">
 
-            <!-- Populate ul using data from locList
-                 but only if item is marked as visible.
-                 Also set up a click event to bounce marker on map. -->
+            <!-- Populate ul using data from visLocs,
+                 which will be just the visible locations.
+                 Also set up a click event to trigger nameClicked,
+                 which will call the event handler for the marker.
+                 It will bounce the associated marker and open the info window. -->
 
             <ul class="text-left" data-bind="foreach: visLocs">
               <li class="text-left" data-bind="text: $data.name, click: $parent.nameClicked"></li>
@@ -96,19 +93,19 @@
 
             <!-- Show an error message if and only if no matches were found -->
 
-            <p class="text-left" data-bind="visible: showFilterError">No locations have that name.  Use the Reset button and try again.</p>
+            <p class="text-left" data-bind="visible: showFilterError">No locations have that name.</p>
           </div>
         </section>
 
       </div> <!-- END LIST VIEW PANEL -->
 
       <!-- MAP -->
-      
+
       <!-- The mapDiv is at col-xs-9 by default.
            Clicking menu icon switches it to col-xs-12.
            Clicking it again toggles it back to col-xs-9.
            A media query handles a special case (see notes
-           in app.js on mapViewClasses). -->
+           in app.js on toggleListPanel). -->
 
       <div id="mapDiv" data-bind="attr: { class: mapViewClasses}">
         <div id="map">
@@ -119,5 +116,8 @@
 
   </div> <!-- END CONTAINER -->
 
+  <!-- These kick things off: -->
+  <script src="js/googleCallback.js"></script>
+  <script async type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&amp;callback=googleSuccess" onerror="googleError()"></script>
 </body>
 </html>

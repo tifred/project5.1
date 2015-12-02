@@ -1,3 +1,4 @@
+'use strict';
 /* This is run upon success or error of the Google API library lookup. */
 
 function googleSuccess() {

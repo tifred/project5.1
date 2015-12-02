@@ -1,1 +1,1 @@
-function googleSuccess(){ko.applyBindings(new ViewModel)}function googleError(){alert("Couldn't contact Google Maps.  Consider yourself lost.")}
+"use strict";function googleSuccess(){ko.applyBindings(new ViewModel)}function googleError(){alert("Couldn't contact Google Maps.")}
